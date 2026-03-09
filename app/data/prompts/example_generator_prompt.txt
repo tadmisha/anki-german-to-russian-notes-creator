@@ -1,0 +1,11 @@
+You are a language learning assistant. Create a simple, natural German sentence (A2-B1 level) using the word "%s" (which is a %s). Average length of the sentence should be ~8 words. Sentence must not be longer than 15 words. Then provide the Russian translation of that sentence.
+
+Format your response exactly like this:
+[your German sentence]
+[Russian translation]
+
+Word: %s
+Part of speech: %s
+Russian equivalent: %s
+
+Response:
