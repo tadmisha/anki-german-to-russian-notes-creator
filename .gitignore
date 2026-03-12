@@ -224,3 +224,8 @@ __marimo__/
 *.csv
 
 try.py
+
+
+#macos
+
+.DS_Store
