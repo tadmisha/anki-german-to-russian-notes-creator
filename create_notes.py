@@ -2,62 +2,103 @@ from app.scrapers.forvo import get_word_pronunciation
 from app.scrapers.pons import get_translation, get_pos, get_plural, get_phonetics, get_article, get_verb_past_tenses
 from app.scrapers.arasaac import get_image, get_tags
 from app.generator import generate_example_with_translation, choose_most_suitable_tags
-from app.utils import generate_id
+from app.utils import generate_id, generate_csv_from_notes
 from app.models import Note
-from time import time
+from curl_cffi.requests.exceptions import RequestException
+from time import time, sleep
 import argparse
+import os
+from dotenv import load_dotenv
+
+#! This creates notes from a given list of words
 
 
+load_dotenv()
+ANKI_COLLECTIONS_PATH = os.getenv("ANKI_COLLECTIONS_PATH")
 
-def main():#file_path: str):
-    with open("words.txt", 'r', encoding="utf-8") as file:
-        words = file.read().split('\n')
+
+def main():
+    words = ["verheiret", "Geburtstag", "sehen", "wie", "viele", "Einzelkind", "sympathisch"]
 
     notes: list[Note] = []
 
-    for word in words:
-        word = "Tee"
+    length = len(words)
+    idx = 0
 
-        print(f"Creating a note for the word \"{word}\"...\n\n")
-        beginning_time = time()
+    while idx<length:
+        word = words[idx]
 
-        id = generate_id()
+        try:
+            print(f"Creating a note for the word \"{word}\"...\n\n")
+            beginning_time = time()
 
-        word, russian_word = get_translation(word) #? word gets reassigned to the best match in pons if spelled incorrectly
+            word, russian_word = get_translation(word) #? word gets reassigned to the best match in pons if spelled incorrectly
 
-        phonetics = get_phonetics(word)
+            id = generate_id()
+            try:
+                phonetics = get_phonetics(word)
+            except Exception:
+                phonetics = "–"
+            pos = get_pos(word)
+            plural = get_plural(word) if pos=="noun" else ""
+            article = get_article(word) if pos=="noun" else ""
+            praeteritum, partizip = get_verb_past_tenses(word) if pos=="verb" else ("", "")
+            _, english_word = get_translation(word, "english")
+            image = get_image(english_word, "en")
+            tags = choose_most_suitable_tags(word, pos)
+            german_example, russian_example = generate_example_with_translation(word, pos, russian_word)
+            pronunciation, audio_ext = get_word_pronunciation(word)
 
-        pos = get_pos(word)
+            audio_filename = f"{word}_{id}.{audio_ext}"
+            image_filename = f"{word}_{id}.png"
 
-        plural = get_plural(word) if pos=="noun" else ""
+            audio_backup_path = "app/media/" + audio_filename
+            image_backup_path = "app/media/" + image_filename
 
-        article = get_article(word) if pos=="noun" else ""
+            audio_anki_path = ANKI_COLLECTIONS_PATH + audio_filename
+            image_anki_path = ANKI_COLLECTIONS_PATH + image_filename
 
-        praeteritum, partizip = get_verb_past_tenses(word) if pos=="verb" else ("", "")
+            audio_field = f"[sound:{audio_filename}]"
+            image_field = f"<img src=\"{image_filename}\">"
 
-        _, english_word = get_translation(word, "english")
+            with open(image_backup_path, "wb") as file: file.write(image)
+            with open(audio_backup_path, "wb") as file: file.write(pronunciation)
 
-        image = get_image(english_word, "en")
+            with open(image_anki_path, "wb") as file: file.write(image)
+            with open(audio_anki_path, "wb") as file: file.write(pronunciation)
 
-        tags = choose_most_suitable_tags(word, pos)
+            note = Note(
+                id=id,
+                russian=russian_word,
+                german=word,
+                article=article,
+                plural=plural,
+                pos=pos,
+                ipa=phonetics,
+                audio_field=audio_field,
+                image_field=image_field,
+                german_example=german_example,
+                russian_example=russian_example,
+                tags=tags
+            )
 
-        german_example, russian_example = generate_example_with_translation(word, pos, russian_word)
+            finishing_time = time()
+            completion_time = round(finishing_time-beginning_time, 2)
+            
+            print(f"\n\nNote created! {completion_time}s")
+            print(f"\nid: {id}\nword: {word}\nrussian: {russian_word}\nenglish: {english_word}\npos: {pos}\nplural: {plural}\nphonetics: {phonetics}\narticle: {article}\npraeteritum: {praeteritum}\npartizip: {partizip}\ntags: {tags}\ngerman example: {german_example}\nrussian example: {russian_example}\n\n\n")
 
-        pronunciation, audio_ext = get_word_pronunciation(word)
+            notes.append(note)
 
-        finishing_time = time()
+            idx += 1
 
-        completion_time = round(finishing_time-beginning_time, 2)
-        print(f"\n\nNote created! {completion_time}s")
+        except (RequestException, AttributeError):
+            print(f"Couldn't download \"{word}\"\n\n")
+            sleep(1.5)
+            continue
+    
+    generate_csv_from_notes(notes)
 
-        with open("image.png", "wb") as file:
-            file.write(image)
-        
-        with open("audio."+audio_ext, "wb") as file:
-            file.write(pronunciation)
-
-        print(f"id: {id}\nword: {word}\nrussian: {russian_word}\nenglish: {english_word}\npos: {pos}\nplural: {plural}\nphonetics: {phonetics}\narticle: {article}\npraeteritum: {praeteritum}\npartizip: {partizip}\ntags: {tags}\ngerman example: {german_example}\nrussian example: {russian_example}")
-        quit()
 
 if __name__ == "__main__":
     '''parser = argparse.ArgumentParser(description="Anki cards from words creator")

@@ -55,10 +55,12 @@ def get_plural(word: str) -> str:
     flexion_text = soup.find("span", class_="flexion").text
 
     if flexion_text == "<->":
-        return "–––"
+        return ""
 
-    plural = flexion_text[:-1].split(' ')[1]
-    if plural[0] == '-':plural = word+plural[1:]
+    flexion = flexion_text[1:-1].split(' ')
+    plural = flexion[0] if len(flexion) == 1 else flexion[1]
+
+    plural = word+plural[1:] if plural[0] == '-' else plural
 
     return plural
 

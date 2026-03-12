@@ -1,10 +1,20 @@
+import csv
 from random import choice
+from app.models import Note
 
 _chars = [chr(i) for i in range(48,58)] + [chr(i) for i in range(65,91)] + [chr(i) for i in range(97,123)]
 
 def generate_id(length: int = 10) -> str:
     id = ''.join([choice(_chars) for _ in range(length)])
     return id
+
+
+def generate_csv_from_notes(notes: list[Note], filename: str = "notes.csv"):
+    with open(filename, "w", encoding="utf-8", newline="") as file:
+        writer = csv.writer(file)
+        for note in notes:
+            writer.writerow((note.id, note.russian, note.german, note.article, note.plural, note.pos, note.ipa, note.audio_field, note.image_field, note.german_example, note.russian_example, ';'.join(note.tags)))
+
 
 
 def conjugate_regular_verb(infinitive: str) -> tuple[str]: #! This function is vibe-coded
