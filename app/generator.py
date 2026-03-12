@@ -18,9 +18,9 @@ with open(_tag_selection_prompt_path, "r", encoding="utf-8") as file:
     _tag_selection_prompt_base = file.read()
 
 
-_client = groq.Client(api_key=os.getenv("GROQ_API_KEY"))
+_client = groq.Client(api_key=_GROQ_API_KEY)
 
-def generate_example_with_translation(word: str, pos: str, russian_word: str) -> tuple[str]:
+def generate_example_with_translation(word: str, pos: str, russian_word: str) -> tuple[str, str]:
     prompt = _example_generation_prompt_base % (word, pos, word, pos, russian_word)
 
     response = _client.chat.completions.create(
@@ -34,14 +34,14 @@ def generate_example_with_translation(word: str, pos: str, russian_word: str) ->
         reasoning_effort="none"
     )
 
-    content = response.choices[0].message.content.strip()
+    content = response.choices[0].message.content.strip() # pyright: ignore[reportOptionalMemberAccess]
 
     german_sentence, russian_sentence = content.split('\n')
 
     return (german_sentence, russian_sentence)
 
 
-def choose_most_suitable_tags(word: str, pos: str) -> tuple[str]:
+def choose_most_suitable_tags(word: str, pos: str) -> str:
     prompt = _tag_selection_prompt_base % (word, pos)
 
     response = _client.chat.completions.create(
@@ -55,6 +55,6 @@ def choose_most_suitable_tags(word: str, pos: str) -> tuple[str]:
         reasoning_effort="none"
     )
 
-    content = response.choices[0].message.content.strip()
+    content = response.choices[0].message.content.strip() # type: ignore
 
     return content

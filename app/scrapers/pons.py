@@ -42,8 +42,10 @@ def get_article(word: str) -> str:
     _update_soup(word)
     soup = _soup
 
-    genus = soup.find("span", class_="genus").find("acronym").get("title")
-    article = _genus_to_article[genus]
+    try: genus = soup.find("span", class_="genus").find("acronym").get("title") # pyright: ignore[reportOptionalMemberAccess]
+    except AttributeError: raise LookupError(f"Genus for the word \"{word}\" not found.")
+
+    article = _genus_to_article[genus] # pyright: ignore[reportArgumentType]
 
     return article
 
@@ -52,13 +54,15 @@ def get_plural(word: str) -> str:
     _update_soup(word)
     soup = _soup
 
-    flexion_text = soup.find("span", class_="flexion").text
+    try: flexion_text = soup.find("span", class_="flexion").text # pyright: ignore[reportOptionalMemberAccess]
+    except AttributeError: raise LookupError(f"Plural for the word \"{word}\" not found.")
+
 
     if flexion_text == "<->":
         return ""
 
     flexion = flexion_text[1:-1].split(' ')
-    plural = flexion[0] if len(flexion) == 1 else flexion[1]
+    plural = flexion[1] if len(flexion) != 1 else flexion[0]
 
     plural = word+plural[1:] if plural[0] == '-' else plural
 
@@ -68,11 +72,11 @@ def get_plural(word: str) -> str:
 
 #^ Verb exclusives
 
-def get_verb_past_tenses(word: str) -> tuple[str]:
+def get_verb_past_tenses(word: str) -> tuple[str, str]:
     _update_soup(word)
     soup = _soup
 
-    past_tenses_el = soup.find("h3", class_="bg-gray-light text-p1 max-w-full overflow-hidden px-4 py-2 text-ellipsis whitespace-nowrap").find("span", class_="info")
+    past_tenses_el = soup.find("h3", class_="bg-gray-light text-p1 max-w-full overflow-hidden px-4 py-2 text-ellipsis whitespace-nowrap").find("span", class_="info") # pyright: ignore[reportOptionalMemberAccess]
 
     if past_tenses_el is not None:
         past_tenses = past_tenses_el.text.split(", ")
@@ -88,7 +92,8 @@ def get_phonetics(word: str) -> str:
     _update_soup(word)
     soup = _soup
 
-    phonetics = soup.find("span", class_="phonetics").text
+    try: phonetics = soup.find("span", class_="phonetics").text # pyright: ignore[reportOptionalMemberAccess]
+    except AttributeError: raise LookupError(f"Phonetics for the word \"{word}\" not found.")
 
     return phonetics
 
@@ -97,16 +102,21 @@ def get_pos(word: str) -> str:
     _update_soup(word)
     soup = _soup
 
-    pos = soup.find("span", class_="wordclass").find("acronym").get("title")
+    try: pos = soup.find("span", class_="wordclass").find("acronym").get("title") # pyright: ignore[reportOptionalMemberAccess]
+    except AttributeError: raise LookupError(f"Part of speech of the word \"{word}\" not found.")
 
-    return pos
+    return pos # pyright: ignore[reportReturnType]
 
 
-def get_translation(word: str, lang: str = "russian") -> tuple[str]:
+def get_translation(word: str, lang: str = "russian") -> tuple[str, str]:
     _update_soup(word, lang)
     soup = _soup
+    
+    try:
+        german = soup.find(lambda tag: tag.name=="div" and tag.get("data-e2e")=="translation-source").find("strong").text # pyright: ignore[reportOptionalMemberAccess]
+        translated = soup.find(lambda tag: tag.name=="div" and tag.get("data-e2e")=="translation-target").find("a").text # pyright: ignore[reportOptionalMemberAccess]
 
-    german = soup.find(lambda tag: tag.name=="div" and tag.get("data-e2e")=="translation-source").find("strong").text
-    translated = soup.find(lambda tag: tag.name=="div" and tag.get("data-e2e")=="translation-target").find("a").text
+    except AttributeError:
+        raise LookupError(f"Translation for the word \"{word}\" not found.")
 
     return german, translated

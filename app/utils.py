@@ -1,6 +1,8 @@
 import csv
 from random import choice
+from time import sleep
 from app.models import Note
+from typing import Callable as function
 
 _chars = [chr(i) for i in range(48,58)] + [chr(i) for i in range(65,91)] + [chr(i) for i in range(97,123)]
 
@@ -17,7 +19,7 @@ def generate_csv_from_notes(notes: list[Note], filename: str = "notes.csv"):
 
 
 
-def conjugate_regular_verb(infinitive: str) -> tuple[str]: #! This function is vibe-coded
+def conjugate_regular_verb(infinitive: str) -> tuple[str, str]: #! This function is vibe-coded
     infinitive = infinitive.lower().strip()
     
     # 1. Configuration
@@ -83,3 +85,26 @@ def conjugate_regular_verb(infinitive: str) -> tuple[str]: #! This function is v
         partizip = f"{found_separable}ge{stem}{buffer}t"
 
     return (praeteritum, partizip)
+
+
+def save_file(filename: str, file_content: bytes, anki_path: str, backup_path: str = "app/data/media/"): # ? Saves the file in anki collections and a backup directory (app/data/media/) 
+    backup_path = "app/data/media/" + filename
+    anki_path = anki_path + filename
+
+    with open(backup_path, "wb") as file: file.write(file_content)
+    with open(anki_path, "wb") as file: file.write(file_content)
+
+
+def error_handling_with_retrying(get_func: function, args: tuple, exceptions, max_tries: int = 3, default_return = None, description: str = "data", sleep_time: float = 1.048596):
+    result = default_return
+
+    for finished_tries in range(max_tries):
+        try:
+            result = get_func(*args)
+            break
+        except exceptions as e:
+            print(e)
+            print(f"Couldn't fetch {description} on try N{finished_tries+1}.")
+            sleep(sleep_time)
+    
+    return result

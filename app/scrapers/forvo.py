@@ -25,16 +25,16 @@ def get_audio_file_url(url: str, country_code: str = "de") -> str:
 
     if german_pronounciations is None:
         raise ValueError(f"Word does not exist in German / no German pronounciation is available.") # ? Word exists on the website, but with no German variant
-
+    
     audio_play_button = german_pronounciations.find("div", class_="play icon-size-xl")
     
-    onclick_function = audio_play_button.get("onclick")
-    onclick_function = onclick_function[onclick_function.find("'")+1:]
-    onclick_function = onclick_function[:onclick_function.find("'")]
+    onclick_function = audio_play_button.get("onclick") # pyright: ignore[reportOptionalMemberAccess]
+    onclick_function = onclick_function[onclick_function.find("'")+1:] # pyright: ignore[reportAttributeAccessIssue, reportOptionalMemberAccess, reportOptionalSubscript]
+    onclick_function = onclick_function[:onclick_function.find("'")] # pyright: ignore[reportAttributeAccessIssue]
 
     audio_path_encoded = onclick_function
 
-    audio_path = b64decode(audio_path_encoded).decode("utf-8")
+    audio_path = b64decode(audio_path_encoded).decode("utf-8") # pyright: ignore[reportArgumentType]
     extension = audio_path[-3:]
 
     audio_url = f"https://forvo.com/{extension}/{audio_path}"
