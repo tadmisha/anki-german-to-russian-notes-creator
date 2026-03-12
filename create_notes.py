@@ -52,8 +52,8 @@ def main():
             audio_filename = f"{word}_{id}.{audio_ext}"
             image_filename = f"{word}_{id}.png"
 
-            audio_backup_path = "app/media/" + audio_filename
-            image_backup_path = "app/media/" + image_filename
+            audio_backup_path = "app/data/media/" + audio_filename
+            image_backup_path = "app/data/media/" + image_filename
 
             audio_anki_path = ANKI_COLLECTIONS_PATH + audio_filename
             image_anki_path = ANKI_COLLECTIONS_PATH + image_filename
