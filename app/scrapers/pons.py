@@ -19,9 +19,6 @@ def _get_soup(url: str) -> bs:
 
     html = response.text
 
-    with open("index.html", "w", encoding="utf-8") as file:
-        file.write(html)
-
     soup = bs(html, "html.parser")
     return soup
 
@@ -45,6 +42,8 @@ def get_article(word: str) -> str:
     try: genus = soup.find("span", class_="genus").find("acronym").get("title") # pyright: ignore[reportOptionalMemberAccess]
     except AttributeError: raise LookupError(f"Genus for the word \"{word}\" not found.")
 
+    if '(' in genus: genus = genus[:genus.find('(')] # pyright: ignore[reportOptionalSubscript, reportAttributeAccessIssue, reportOptionalMemberAccess, reportOperatorIssue]
+    
     article = _genus_to_article[genus] # pyright: ignore[reportArgumentType]
 
     return article
@@ -83,6 +82,11 @@ def get_verb_past_tenses(word: str) -> tuple[str, str]:
     
     else: 
         past_tenses = conjugate_regular_verb(word)
+    
+    if len(past_tenses) == 1:
+        past_tenses = [""]+past_tenses
+        print("One past tense")
+
     
     return past_tenses
 
