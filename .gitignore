@@ -220,6 +220,7 @@ __marimo__/
 *.ogg
 *.png
 *.html
+*.txt
 
 *.csv
 
