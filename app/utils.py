@@ -15,7 +15,7 @@ def generate_csv_from_notes(notes: list[Note], filename: str = "notes.csv"):
     with open(filename, "w", encoding="utf-8", newline="") as file:
         writer = csv.writer(file)
         for note in notes:
-            writer.writerow((note.id, note.russian, note.german, note.article, note.plural, note.pos, note.ipa, note.audio_field, note.image_field, note.german_example, note.russian_example, ';'.join(note.tags)))
+            writer.writerow((note.id, note.russian, note.german, note.article, note.plural, note.pos, note.ipa, note.audio_field, note.image_field, note.praeteritum, note.partizip, note.german_example, note.russian_example, ';'.join(note.tags)))
 
 
 
@@ -88,23 +88,31 @@ def conjugate_regular_verb(infinitive: str) -> tuple[str, str]: #! This function
 
 
 def save_file(filename: str, file_content: bytes, anki_path: str, backup_path: str = "app/data/media/"): # ? Saves the file in anki collections and a backup directory (app/data/media/) 
-    backup_path = "app/data/media/" + filename
-    anki_path = anki_path + filename
+    file_path_backup = backup_path + filename
+    file_path_anki = anki_path + filename
 
-    with open(backup_path, "wb") as file: file.write(file_content)
-    with open(anki_path, "wb") as file: file.write(file_content)
+    with open(file_path_backup, "wb") as file: file.write(file_content)
+    with open(file_path_anki, "wb") as file: file.write(file_content)
 
 
-def error_handling_with_retrying(get_func: function, args: tuple, exceptions, max_tries: int = 3, default_return = None, description: str = "data", sleep_time: float = 1.048596):
+def error_handling_with_retrying(get_func: function, args: tuple, exceptions, max_attempts: int = 3, default_return = None, description: str = "data", sleep_time: float = 1.048596, error_function: function = lambda: None, error_function_args: tuple = (), error_function_attempt: int = 2):
     result = default_return
 
-    for finished_tries in range(max_tries):
+    for attempt in range(max_attempts):
         try:
             result = get_func(*args)
             break
         except exceptions as e:
-            print(e)
-            print(f"Couldn't fetch {description} on try N{finished_tries+1}.")
+            print(f"Couldn't fetch {description} on try N{attempt+1}.", type(e), end="")
+            if (attempt+1) % error_function_attempt == 0: error_function(*error_function_args)
+            print(" Discarding." if attempt==max_attempts-1 else "")
             sleep(sleep_time)
     
     return result
+
+
+def read_words(filename: str) -> list[str]:
+    with open(filename, "r", encoding="utf-8") as file:
+        words = file.read().split("\n")
+    
+    return words
