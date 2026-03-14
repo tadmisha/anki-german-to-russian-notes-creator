@@ -18,7 +18,8 @@ def fetch_word_data(word: str) -> Note:
     id = generate_id()
     correct_word, russian_word = get_translation(word) #? word gets reassigned to the best match in pons so spelling is better
     if not ('(' in correct_word or ')' in correct_word) and len(word.split()) == len(correct_word.split()): word = correct_word #? if pons' match is something like Freund -> Freund(in) and for expressions (multiple words), that are not in pons
-    phonetics = error_handling_with_retrying(get_phonetics, (word,), (RequestException, ValueError, LookupError), 3, "–", "phonetics")
+    word = ''.join([symb for symb in word if symb != '·']) #? Deleting '·' that for some reason appears in pons if the word is the same in English and German
+    phonetics = error_handling_with_retrying(get_phonetics, (word,), (RequestException, ValueError, LookupError), 2, "–", "phonetics")
     pos = error_handling_with_retrying(get_pos, (word,), (RequestException, ValueError, LookupError), 3, "–", "part of speech")
     plural = error_handling_with_retrying(get_plural, (word,), (RequestException, ValueError, LookupError), 3, "–", "plural", error_function=pons_update_soup, error_function_args=(word,)) if pos=="noun" else ""
     article = error_handling_with_retrying(get_article, (word,), (RequestException, ValueError, LookupError), 3, "–", "article", error_function=pons_update_soup, error_function_args=(word,)) if pos=="noun" else ""
