@@ -116,14 +116,15 @@ def get_translation(word: str, lang: str = "russian") -> tuple[str, str]:
     _update_soup(word, lang)
     soup = _soup
     
-    german = soup.find(lambda tag: tag.name=="div" and tag.get("data-e2e")=="translation-source").find("strong") # pyright: ignore[reportOptionalMemberAccess]
+    german = soup.find(lambda tag: tag.name=="div" and tag.get("data-e2e")=="translation-source") # pyright: ignore[reportOptionalMemberAccess]
+    german = german.find("strong") if german is not None else None
     german = german.text if german is not None else word
 
-    try: translated = soup.find(lambda tag: tag.name=="div" and tag.get("data-e2e")=="translation-target").text # pyright: ignore[reportOptionalMemberAccess]
+    try: translated = soup.find(lambda tag: tag.name=="div" and tag.get("data-e2e")=="translation-target").find("a").text # pyright: ignore[reportOptionalMemberAccess]
     except AttributeError: 
-        try:
-            translated = soup.find(lambda tag: tag.name=="div" and tag.get("data-e2e")=="input-slot-target").text # pyright: ignore[reportOptionalMemberAccess]
+        try: translated = soup.find(lambda tag: tag.name=="div" and tag.get("data-e2e")=="translation-target").text # pyright: ignore[reportOptionalMemberAccess]
         except AttributeError: 
-            raise LookupError(f"Translation for the word \"{word}\" not found.")
+            try: translated = soup.find(lambda tag: tag.name=="div" and tag.get("data-e2e")=="input-slot-target").text # pyright: ignore[reportOptionalMemberAccess]
+            except AttributeError: raise LookupError(f"Translation for the word \"{word}\" not found.")
 
     return german, translated
