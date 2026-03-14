@@ -28,7 +28,7 @@ def fetch_word_data(word: str) -> Note:
     if not image: image = error_handling_with_retrying(get_image_alternative, (english_word,), (RequestException, ValueError, LookupError), 3, b"", "image (alternative)")
     tags = error_handling_with_retrying(choose_most_suitable_tags, (word, pos), (APIConnectionError, RateLimitError, RequestException, ValueError), 2, "", "tags suitable for the word")
     german_example, russian_example = error_handling_with_retrying(generate_example_with_translation, (word, pos, russian_word), (APIConnectionError, RateLimitError, RequestException, ValueError), 2, ("",""), "example sentence")
-    pronunciation, audio_ext = error_handling_with_retrying(get_word_pronunciation, (word,), (RequestException, ValueError, LookupError), 6, (b"", ".mp3"), "pronounciation", 1.048596*3, error_function=lambda: sleep(1.048596*10), error_function_try=4) # type: ignore
+    pronunciation, audio_ext = error_handling_with_retrying(get_word_pronunciation, (word,), (RequestException, ValueError, LookupError), 6, (b"", ".mp3"), "pronounciation", 1.048596*3, error_function=lambda: sleep(1.048596*10), error_function_attempt=4) # type: ignore
 
     audio_filename = f"{word}_{id}.{audio_ext}"
     image_filename = f"{word}_{id}.png"
