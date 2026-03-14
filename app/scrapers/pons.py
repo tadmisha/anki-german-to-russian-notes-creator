@@ -116,11 +116,14 @@ def get_translation(word: str, lang: str = "russian") -> tuple[str, str]:
     _update_soup(word, lang)
     soup = _soup
     
-    try:
-        german = soup.find(lambda tag: tag.name=="div" and tag.get("data-e2e")=="translation-source").find("strong").text # pyright: ignore[reportOptionalMemberAccess]
-        translated = soup.find(lambda tag: tag.name=="div" and tag.get("data-e2e")=="translation-target").find("a").text # pyright: ignore[reportOptionalMemberAccess]
+    german = soup.find(lambda tag: tag.name=="div" and tag.get("data-e2e")=="translation-source").find("strong") # pyright: ignore[reportOptionalMemberAccess]
+    german = german.text if german is not None else word
 
-    except AttributeError:
-        raise LookupError(f"Translation for the word \"{word}\" not found.")
+    try: translated = soup.find(lambda tag: tag.name=="div" and tag.get("data-e2e")=="translation-target").text # pyright: ignore[reportOptionalMemberAccess]
+    except AttributeError: 
+        try:
+            translated = soup.find(lambda tag: tag.name=="div" and tag.get("data-e2e")=="input-slot-target").text # pyright: ignore[reportOptionalMemberAccess]
+        except AttributeError: 
+            raise LookupError(f"Translation for the word \"{word}\" not found.")
 
     return german, translated
