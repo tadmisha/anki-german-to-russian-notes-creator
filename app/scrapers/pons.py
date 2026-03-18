@@ -78,7 +78,7 @@ def get_verb_past_tenses(word: str) -> tuple[str, str]:
     past_tenses_el = soup.find("h3", class_="bg-gray-light text-p1 max-w-full overflow-hidden px-4 py-2 text-ellipsis whitespace-nowrap").find("span", class_="info") # pyright: ignore[reportOptionalMemberAccess]
 
     if past_tenses_el is not None:
-        past_tenses = past_tenses_el.text.split(", ")
+        past_tenses = past_tenses_el.text.split(", ")[-2:]
     
     else: 
         past_tenses = conjugate_regular_verb(word)
