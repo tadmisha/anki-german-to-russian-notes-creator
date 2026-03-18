@@ -1,7 +1,8 @@
 class Note():
-    def __init__(self, id: str, german: str, russian: str, article: str, plural: str, praeteritum: str, partizip: str, pos: str, ipa: str, audio_field: str, image_field: str, audio_filename: str, image_filename: str, german_example: str, russian_example: str, tags: str, image: bytes, audio: bytes):
+    def __init__(self, id: str, german: str, russian: str, english: str, article: str, plural: str, praeteritum: str, partizip: str, pos: str, ipa: str, audio_field: str, image_field: str, audio_filename: str, image_filename: str, german_example: str, russian_example: str, tags: str, image: bytes, audio: bytes):
         self.id = id
         self.russian = russian
+        self.english = english
         self.german = german
         self.article = article
         self.plural = plural
