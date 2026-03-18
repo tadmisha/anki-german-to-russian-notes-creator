@@ -28,7 +28,8 @@ def main(filename: str):
         completion_time = finishing_time-beginning_time
         print(f"Note created in {completion_time} seconds.\n\n")
 
-        notes.append(note)
+        if note is not None: notes.append(note)
+        else: print(f"No data on the word \"{word}\", discarding.\n\n")
     
     for note in notes:
         save_file(note.audio_filename, note.audio, ANKI_COLLECTIONS_PATH) # pyright: ignore[reportArgumentType]
