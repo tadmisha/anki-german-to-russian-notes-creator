@@ -19,6 +19,9 @@ def _get_soup(url: str) -> bs:
 
     html = response.text
 
+    with open("index.html", "w", encoding="utf-8") as file:
+        file.write(html)
+
     soup = bs(html, "html.parser")
     return soup
 
@@ -120,7 +123,9 @@ def get_translation(word: str, lang: str = "russian") -> tuple[str, str]:
     german = german.find("strong") if german is not None else None
     german = german.text if german is not None else word
 
-    try: translated = soup.find(lambda tag: tag.name=="div" and tag.get("data-e2e")=="translation-target").find("a").text # pyright: ignore[reportOptionalMemberAccess]
+    try: 
+        translated = soup.find(lambda tag: tag.name=="div" and tag.get("data-e2e")=="translation-target").find_all("a") # type: ignore
+        translated = ' '.join(a.text for a in translated) # pyright: ignore[reportOptionalMemberAccess]
     except AttributeError: 
         try: translated = soup.find(lambda tag: tag.name=="div" and tag.get("data-e2e")=="translation-target").text # pyright: ignore[reportOptionalMemberAccess]
         except AttributeError: 
