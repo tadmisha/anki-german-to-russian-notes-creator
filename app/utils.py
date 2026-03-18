@@ -103,7 +103,7 @@ def error_handling_with_retrying(get_func: function, args: tuple, exceptions, ma
             result = get_func(*args)
             break
         except exceptions as e:
-            print(f"Couldn't fetch {description} on try N{attempt+1}.", type(e), end="")
+            print(f"Couldn't fetch {description} on attempt N{attempt+1}.", type(e), end="")
             if (attempt+1) % error_function_attempt == 0: error_function(*error_function_args)
             print(" Discarding." if attempt==max_attempts-1 else "")
             sleep(sleep_time)
