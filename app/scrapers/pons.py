@@ -19,9 +19,6 @@ def _get_soup(url: str) -> bs:
 
     html = response.text
 
-    with open("index.html", "w", encoding="utf-8") as file:
-        file.write(html)
-
     soup = bs(html, "html.parser")
     return soup
 
