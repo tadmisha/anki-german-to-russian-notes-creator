@@ -116,3 +116,23 @@ def read_words(filename: str) -> list[str]:
         words = file.read().split("\n")
     
     return words
+
+
+def get_words_from_notes_data(notes_data: list[dict]) -> list[str]:
+    words = []
+    for note_data in notes_data:
+        word = note_data["fields"]["Front"]["value"]
+        words.append(word)
+
+    return words
+
+
+def get_word_base_form(word: str): # ? May be multiple for something like ihr/ihre that I have in one note
+    if '/' in word: return "" #? Will process manually case-by-case
+
+    if '(' in word and not '.' in word: word = word[:word.find('(')]
+    if word[:4] in ["der ", "die ", "das "]: word = word[4:]
+
+    word = word.strip()
+
+    return word
