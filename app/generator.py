@@ -30,7 +30,7 @@ def generate_example_with_translation(word: str, pos: str, russian_word: str) ->
             {"role": "user", "content": prompt}
         ],
         temperature=0.2,
-        max_tokens=40,
+        max_tokens=60,
         reasoning_effort="none"
     )
 
@@ -51,7 +51,7 @@ def choose_most_suitable_tags(word: str, pos: str) -> str:
             {"role": "user", "content": prompt}
         ],
         temperature=0.3,
-        max_tokens=50,
+        max_tokens=70,
         reasoning_effort="none"
     )
 
