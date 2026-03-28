@@ -118,21 +118,22 @@ def read_words(filename: str) -> list[str]:
     return words
 
 
-def get_words_from_notes_data(notes_data: list[dict]) -> list[str]:
-    words = []
+def get_words_and_note_ids(notes_data: list[dict]) -> list[dict[str, str|int]]:
+    words_and_ids = [] #? [{"word": "*word*", "id": *id*}]
     for note_data in notes_data:
-        word = note_data["fields"]["Front"]["value"]
-        words.append(word)
+        if note_data["fields"]["POS"]["value"]: continue #? If note already "modern style"
+        word = note_data["fields"]["German"]["value"]
+        id = note_data["noteId"]
+        words_and_ids.append({"word": word, "id": id})
 
-    return words
+    return words_and_ids
 
 
-def get_word_base_form(word: str): # ? May be multiple for something like ihr/ihre that I have in one note
+def get_word_base_form(word: str) -> str: # ? May be multiple for something like ihr/ihre that I have in one note
     if '/' in word: return "" #? Will process manually case-by-case
 
     if '(' in word and not '.' in word: word = word[:word.find('(')]
     if word[:4] in ["der ", "die ", "das "]: word = word[4:]
 
     word = word.strip()
-
     return word

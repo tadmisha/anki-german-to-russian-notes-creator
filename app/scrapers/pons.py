@@ -123,6 +123,7 @@ def get_translation(word: str, lang: str = "russian") -> tuple[str, str]:
     try: 
         translated = soup.find(lambda tag: tag.name=="div" and tag.get("data-e2e")=="translation-target").find_all("a") # type: ignore
         translated = ' '.join(a.text for a in translated) # pyright: ignore[reportOptionalMemberAccess]
+        if not translated: raise AttributeError
     except AttributeError: 
         try: translated = soup.find(lambda tag: tag.name=="div" and tag.get("data-e2e")=="translation-target").text # pyright: ignore[reportOptionalMemberAccess]
         except AttributeError: 
