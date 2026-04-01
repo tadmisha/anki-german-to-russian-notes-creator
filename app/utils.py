@@ -3,6 +3,7 @@ from random import choice
 from time import sleep
 from app.models import Note
 from typing import Callable as function
+import os
 
 _chars = [chr(i) for i in range(48,58)] + [chr(i) for i in range(65,91)] + [chr(i) for i in range(97,123)]
 
@@ -95,6 +96,16 @@ def save_file(filename: str, file_content: bytes, anki_path: str, backup_path: s
     with open(file_path_anki, "wb") as file: file.write(file_content)
 
 
+def find_files_by_id(word_id: str, files_path: str) -> list[str]:
+    files = os.listdir(files_path)
+    matching_files = []
+    for file in files:
+        if word_id in file:
+            matching_files.append(files_path+file)
+
+    return matching_files
+
+
 def error_handling_with_retrying(get_func: function, args: tuple, exceptions, max_attempts: int = 3, default_return = None, description: str = "data", sleep_time: float = 1.048596, error_function: function = lambda: None, error_function_args: tuple = (), error_function_attempt: int = 2):
     result = default_return
 
@@ -137,3 +148,16 @@ def get_word_base_form(word: str) -> str: # ? May be multiple for something like
 
     word = word.strip()
     return word
+
+
+def get_duplicates(notes_data: dict) -> dict:
+    words = []
+    duplicates = []
+    for note_data in notes_data:
+        word = note_data["fields"]["German"]["value"]
+        word_id = note_data["fields"]["ID"]["value"]
+        note_id = note_data["noteId"]
+        if word in words: duplicates.append({"word": word, "word_id": word_id, "note_id": note_id})
+        else: words.append(word)
+
+    return duplicates # type: ignore
